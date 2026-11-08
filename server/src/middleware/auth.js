@@ -9,14 +9,14 @@ export function createSessionCookie(res, userId) {
   res.cookie(cookieName(), token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 }
 
 export function clearSessionCookie(res) {
-  res.clearCookie(cookieName(), { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
+  res.clearCookie(cookieName(), { httpOnly: true, sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
 }
 
 export async function requireAuth(req, res, next) {
