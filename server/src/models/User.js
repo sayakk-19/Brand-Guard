@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true, select: false },
   role: { type: String, enum: ['admin', 'creator', 'manager', 'reviewer'], default: 'creator' },
   isActive: { type: Boolean, default: true },
+  membershipStatus: { type: String, enum: ['approved', 'pending', 'rejected'], default: 'approved' },
   avatarColor: { type: String, default: '#dce8e3' }
 }, { timestamps: true });
 

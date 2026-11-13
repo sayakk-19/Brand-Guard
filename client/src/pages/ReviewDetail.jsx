@@ -50,7 +50,7 @@ export default function ReviewDetail() {
   const highCount = openFindings.filter((finding) => ['high', 'critical'].includes(finding.severity)).length;
   const isReviewer = ['admin', 'manager', 'reviewer'].includes(user?.role) && String(item?.createdBy?._id || item?.createdBy) !== String(user?._id || '');
   const canSubmit = item && ['draft', 'changes_requested'].includes(item.status);
-  const canEdit = item && (['admin', 'manager'].includes(user?.role) || (user?.role === 'creator' && String(item.createdBy?._id || item.createdBy) === String(user?._id)));
+  const canEdit = item && (['admin', 'manager'].includes(user?.role) || (['creator', 'reviewer'].includes(user?.role) && String(item.createdBy?._id || item.createdBy) === String(user?._id)));
   const canDecide = item?.status === 'in_review' && isReviewer;
 
   async function runAction(key, action) {

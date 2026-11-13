@@ -23,7 +23,7 @@ const revisionSchema = z.object({ body: z.string().trim().min(20).max(30000), ch
 const findOwnedItem = (id, workspaceId) => ContentItem.findOne({ _id: id, workspaceId, archivedAt: null });
 
 function canEditItem(item, user) {
-  return ['admin', 'manager'].includes(user.role) || (user.role === 'creator' && String(item.createdBy) === String(user._id));
+  return ['admin', 'manager'].includes(user.role) || (['creator', 'reviewer'].includes(user.role) && String(item.createdBy) === String(user._id));
 }
 
 function assertCanEditItem(item, user) {
@@ -139,6 +139,8 @@ router.post('/:id/submit', asyncHandler(async (req, res) => {
   if (!item) throw new ApiError(404, 'Review not found.');
   assertCanEditItem(item, req.user);
   if (!item.currentRevisionId) throw new ApiError(409, 'Create a revision before submitting.');
+  if (item.status === 'in_review') return res.json({ success: true, item });
+  if (item.status === 'approved') throw new ApiError(409, 'Create a new revision before resubmitting approved content.');
   item.status = 'in_review';
   await item.save();
   await recordActivity({ workspaceId: req.user.workspaceId, actorId: req.user._id, contentItemId: item._id, action: 'submitted_for_review', description: `${req.user.name} submitted “${item.title}” for review.` });

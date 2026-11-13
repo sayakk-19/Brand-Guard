@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
     },
     async register(details) {
       const { data } = await api.post('/auth/register', details);
+      if (data.pendingApproval) return data;
       setUser(data.user);
       setSessionNotice(data.joinedWorkspace ? `You joined as ${displayRole(data.user.role)}.` : `Your workspace is ready. You joined as ${displayRole(data.user.role)}.`);
       return data.user;

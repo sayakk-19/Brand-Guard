@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [members, setMembers] = useState([]);
   const [memberError, setMemberError] = useState('');
   const [memberNotice, setMemberNotice] = useState('');
+  const [memberBusy, setMemberBusy] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -30,9 +31,19 @@ export default function Dashboard() {
   const canManageTeam = user?.role === 'admin' && user?.email !== 'admin@brandguard.demo';
   useEffect(() => { if (!canManageTeam) return; api.get('/workspace/members').then(({ data: result }) => setMembers(result.members)).catch((err) => setMemberError(err.userMessage || 'Could not load workspace members.')); }, [canManageTeam]);
   async function changeMemberRole(memberId, role) {
-    setMemberError(''); setMemberNotice('');
+    setMemberError(''); setMemberNotice(''); setMemberBusy(true);
     try { const { data: result } = await api.patch(`/workspace/members/${memberId}/role`, { role }); setMembers((current) => current.map((member) => member._id === memberId ? result.member : member)); setMemberNotice('Workspace role updated.'); }
     catch (err) { setMemberError(err.userMessage || 'Could not update this role.'); }
+    finally { setMemberBusy(false); }
+  }
+  async function decideAccess(memberId, decision) {
+    setMemberBusy(true); setMemberError(''); setMemberNotice('');
+    try {
+      const { data: result } = await api.patch(`/workspace/members/${memberId}/access`, { decision });
+      setMembers((current) => current.map((member) => member._id === memberId ? result.member : member));
+      setMemberNotice(`Workspace access ${decision}.`);
+    } catch (err) { setMemberError(err.userMessage || 'Could not update access.'); }
+    finally { setMemberBusy(false); }
   }
   const summary = data?.summary;
 
@@ -72,7 +83,7 @@ export default function Dashboard() {
         </div>
         <div className="panel focus-panel"><div className="focus-decoration"><Sparkles size={18} /></div><span className="panel-kicker">A BETTER WAY TO REVIEW</span><h2>Good governance should help great work move forward.</h2><p>BrandGuard connects every finding to approved guidance, so creators know what to change and reviewers know what they are approving.</p><button className="text-button" onClick={() => navigate('/insights')}>Explore governance insights <ArrowRight size={15} /></button></div>
       </section>
-      {canManageTeam && <section className="panel team-management-panel"><div className="panel-heading"><div><span className="panel-kicker">WORKSPACE ACCESS</span><h2>Team members</h2><p>Manage the roles of people in {user?.workspaceName || 'your workspace'}.</p></div><ShieldCheck size={18} /></div>{memberError && <div className="inline-alert error-alert">{memberError}</div>}{memberNotice && <div className="inline-alert success-alert">{memberNotice}</div>}{members.length ? <div className="team-member-list">{members.map((member) => <div className="team-member-row" key={member._id}><span className="avatar avatar-small">{initials(member.name)}</span><div className="team-member-info"><strong>{member.name}</strong><small>{member.email}</small></div><select aria-label={`Role for ${member.name}`} value={member.role} disabled={String(member._id) === String(user?.id || user?._id)} onChange={(event) => changeMemberRole(member._id, event.target.value)}><option value="admin">Admin</option><option value="creator">Creator</option><option value="manager">Manager</option><option value="reviewer">Reviewer</option></select></div>)}</div> : !memberError ? <p className="team-empty">No active members yet.</p> : null}<p className="team-management-note">Your own role is locked here. The public AcmeFlow demo admin is also protected from role changes.</p></section>}
+      {canManageTeam && <section className="panel team-management-panel"><div className="panel-heading"><div><span className="panel-kicker">WORKSPACE ACCESS</span><h2>Team members</h2><p>Manage the roles of people in {user?.workspaceName || 'your workspace'}.</p></div><button className="button button-secondary button-small" onClick={() => api.get('/workspace/members').then(({ data }) => { setMembers(data.members); setMemberError(''); }).catch((err) => setMemberError(err.userMessage || 'Could not refresh members.'))}>Refresh members</button></div>{memberError && <div className="inline-alert error-alert">{memberError}</div>}{memberNotice && <div className="inline-alert success-alert">{memberNotice}</div>}{members.length ? <div className="team-member-list">{members.map((member) => <div className="team-member-row" key={member._id}><span className="avatar avatar-small">{initials(member.name)}</span><div className="team-member-info"><strong>{member.name}</strong><small>{member.email}</small></div>{member.membershipStatus === 'pending' ? <div><span>Requested: {titleCase(member.role)} </span><button className="button button-secondary button-small" disabled={memberBusy} onClick={() => decideAccess(member._id, 'approved')}>Approve</button> <button className="button button-secondary button-small" disabled={memberBusy} onClick={() => decideAccess(member._id, 'rejected')}>Decline</button></div> : member.membershipStatus === 'rejected' ? <span>Access declined</span> : <select aria-label={`Role for ${member.name}`} value={member.role} disabled={memberBusy || String(member._id) === String(user?.id || user?._id)} onChange={(event) => changeMemberRole(member._id, event.target.value)}><option value="admin">Admin</option><option value="creator">Creator</option><option value="manager">Manager</option><option value="reviewer">Reviewer</option></select>}</div>)}</div> : !memberError ? <p className="team-empty">No active members yet.</p> : null}<p className="team-management-note">Your own role is locked here. The public AcmeFlow demo admin is also protected from role changes.</p></section>}
       <div className="dashboard-footnote"><span><Target size={14} /> Reviews stay tied to the exact content revision and source versions examined.</span><span>BrandGuard workspace · {formatDate(new Date(), { month: 'long', year: 'numeric' })}</span></div>
     </div>
   );

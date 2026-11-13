@@ -16,7 +16,8 @@ This repository contains a working MERN foundation with seeded demo data. It is 
 - Suggested corrections that create a new immutable content revision and trigger a fresh analysis.
 - Reviewer actions tied to a content hash and the approved-source version set used in that review.
 - Optional Gemini review for tone and messaging. It is disabled by default; the rule-based review works without an AI key.
-- Four tests for the primary deterministic review behaviours.
+- Seven unit tests plus an isolated database-backed workflow test suite.
+- Registration with admin approval for joining existing workspaces, dashboard team controls, and personal theme/list/channel preferences.
 
 ## What is not implemented yet
 
@@ -46,6 +47,13 @@ The review engine is hybrid by design: explicit rules and facts use ordinary cod
 ## Run locally
 
 ### 1. Install dependencies
+
+Clone the repository and enter its root:
+
+```bash
+git clone https://github.com/sayakk-19/Brand-Guard.git
+cd Brand-Guard
+```
 
 From the project root:
 
@@ -225,3 +233,42 @@ node --test server/tests/reviewEngine.test.js
 ## Development status
 
 The text-governance core and its connected user workflow are implemented in this codebase. Run the setup steps above to initialise your database and launch it. Image/PDF review and richer semantic retrieval are intentionally not represented as completed features.
+
+
+## Workspace onboarding and team access
+
+- **Create:** Register with a new workspace name as Admin. Your workspace opens immediately.
+- **Join:** Enter an existing workspace name (case-insensitive) and request Creator, Manager or Reviewer. No session is issued until an admin approves you.
+- **Approve:** The workspace admin opens Overview > Team members, clicks Refresh members, then Approve or Decline. Approved users sign in normally; there is no email notification yet.
+- **Manage:** Admins change approved members' roles from the same panel. Self-role changes and demo-admin management are blocked.
+- **Demo:** The four seeded accounts need no approval. Everyone using them shares the same data. Do not use private content. Registration into the demo workspace and deletion of seeded demo identities are blocked.
+- Existing accounts retain access when upgrading. Only new join requests require approval.
+- Settings persist theme, compact lists and preferred publishing channel in this browser. A deleted account is deactivated; its review history remains.
+
+## Deployment
+
+Deploy the Express server separately from the static frontend, with a persistent MongoDB database. The Netlify client build alone does not deploy the API.
+
+Frontend settings used by this repository:
+
+- Repository root as base directory.
+- Build: `npm --workspace @brandguard/client run build`
+- Publish: `client/dist`
+- Build environment: `VITE_API_URL=https://YOUR-API-HOST/api` (replace with your actual API URL).
+- `client/public/_redirects` provides SPA refresh routing and is copied into `dist`.
+
+Backend: install from the repository root, then run `npm run start --workspace server`. Configure `NODE_ENV=production`, `MONGODB_URI`, a strong `JWT_SECRET`, and `CLIENT_ORIGIN=https://brandguard21.netlify.app`. Set optional Gemini values only on the backend. Preserve proxy trust and Secure/HttpOnly/SameSite=None cookies. Browsers that block third-party cookies may require a same-site API domain or proxy. Never use a localhost API URL in the deployed client.
+
+Deploy both changed components. Do not reset the live database to install these changes. Seed only an intended demo dataset. After deployment test registration, pending login, approval in a second browser session, role change, review submission, and direct `/profile` and `/settings` refreshes.
+
+## Full workflow verification
+
+```bash
+npm test
+npm run build
+node server/tests/workflow.integration.js
+```
+
+The last command launches a temporary local MongoDB on port 27028 and never reads `server/.env`. Set `MONGOD_BINARY` to your `mongod` executable if it is not at the Windows default in that script. Keep port 27028 free. Temporary test files are left in the OS temporary directory for inspection. Tests must not be pointed at production.
+
+See [Round 3 submission](docs/ROUND3_SUBMISSION.md) for feature inventory, architecture, evidence, known limitations and the release checklist.

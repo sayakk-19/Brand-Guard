@@ -11,8 +11,17 @@ const router = Router();
 
 router.get('/members', requireRole('admin'), asyncHandler(async (req, res) => {
   if (req.user.email === 'admin@brandguard.demo') throw new ApiError(403, 'Role management is disabled for the public demo administrator.');
-  const members = await User.find({ workspaceId: req.user.workspaceId, isActive: true }).select('name email role createdAt').sort({ name: 1 });
+  const members = await User.find({ workspaceId: req.user.workspaceId, isActive: true }).select('name email role membershipStatus createdAt').sort({ name: 1 });
   res.json({ success: true, members });
+}));
+
+router.patch('/members/:id/access', requireRole('admin'), asyncHandler(async (req, res) => {
+  if (req.user.email === 'admin@brandguard.demo') throw new ApiError(403, 'Membership management is disabled for demo accounts.');
+  const { decision } = z.object({ decision: z.enum(['approved', 'rejected']) }).parse(req.body);
+  const member = await User.findOneAndUpdate({ _id: req.params.id, workspaceId: req.user.workspaceId, isActive: true, membershipStatus: 'pending' }, { $set: { membershipStatus: decision } }, { new: true, runValidators: true }).select('name email role membershipStatus createdAt');
+  if (!member) throw new ApiError(409, 'This request has already been handled or is unavailable. Refresh the member list.');
+  await recordActivity({ workspaceId: req.user.workspaceId, actorId: req.user._id, action: 'membership_decided', description: `${req.user.name} ${decision} workspace access for ${member.name}.` });
+  res.json({ success: true, member });
 }));
 
 router.patch('/members/:id/role', requireRole('admin'), asyncHandler(async (req, res) => {
@@ -20,6 +29,7 @@ router.patch('/members/:id/role', requireRole('admin'), asyncHandler(async (req,
   const input = z.object({ role: z.enum(['admin', 'creator', 'manager', 'reviewer']) }).parse(req.body);
   const member = await User.findOne({ _id: req.params.id, workspaceId: req.user.workspaceId, isActive: true });
   if (!member) throw new ApiError(404, 'Workspace member not found.');
+  if (member.membershipStatus !== 'approved') throw new ApiError(400, 'Approve membership before changing its role.');
   if (member._id.equals(req.user._id)) throw new ApiError(400, 'You cannot change your own role. Ask another workspace administrator.');
   if (member.email === 'admin@brandguard.demo') throw new ApiError(403, 'The public demo administrator role cannot be changed.');
   if (member.role === 'admin' && input.role !== 'admin') {

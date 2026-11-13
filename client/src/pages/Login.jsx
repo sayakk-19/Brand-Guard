@@ -17,6 +17,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     if (!registering || workspaceName.trim().length < 2) { setWorkspaceExists(null); return undefined; }
@@ -29,7 +30,7 @@ export default function Login() {
   async function handleSubmit(event) {
     event.preventDefault(); setError(''); setBusy(true);
     if (registering && password !== confirmPassword) { setError('Those passwords do not match.'); setBusy(false); return; }
-    try { if (registering) await register({ name, email, password, workspaceName, role }); else await login({ email, password }); }
+    try { if (registering) { const result = await register({ name, email, password, workspaceName, role }); if (result.pendingApproval) { setNotice(result.message); setRegistering(false); setPassword(''); } } else await login({ email, password }); }
     catch (err) { setError(err.userMessage || 'Sign-in failed.'); }
     finally { setBusy(false); }
   }
@@ -53,6 +54,8 @@ export default function Login() {
         <div className="login-form-wrap">
           <div className="login-form-heading"><span className="eyebrow">{registering ? 'GET STARTED' : 'WELCOME BACK'}</span><h2>{registering ? 'Create your workspace' : 'Sign in to your workspace'}</h2><p>{registering ? 'Set up your account to start reviewing content with BrandGuard.' : 'Pick up where your team left off.'}</p></div>
           <form onSubmit={handleSubmit} className="login-form">
+            {registering && <div className="demo-access"><strong>Choose how to get started</strong><p><b>Join a team:</b> Enter the same workspace name and request a role. Its administrator must approve you before you can work.</p><p><b>Create a workspace:</b> Enter a new name. You must start as Admin to manage access.</p><p><b>Just testing?</b> Sign in with a demo account—no approval needed. Demo activity is public to everyone using those accounts. Do not enter private content.</p></div>}
+            {notice && <div className="inline-alert success-alert" role="status">{notice}</div>}
             {registering && <><label>Your name<input autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Sayak Sarkar" required minLength={2} maxLength={80} /></label><label>Workspace name<input autoComplete="organization" value={workspaceName} onChange={(event) => { setWorkspaceName(event.target.value); setWorkspaceExists(null); }} placeholder="Enter an existing workspace name to join, or create a new one" required minLength={2} maxLength={80} /></label><label>Your role<select value={role} disabled={workspaceExists === null} onChange={(event) => setRole(event.target.value)}>{workspaceExists === true ? <><option value="creator">Creator</option><option value="manager">Manager</option><option value="reviewer">Reviewer</option></> : <option value="admin">Admin · workspace owner</option>}</select><small className="registration-hint">{workspaceExists === true ? `Joining ${workspaceName.trim()} · choose your role` : workspaceExists === false ? 'New workspace · the first member is its administrator' : 'Checking workspace…'}</small></label></>}
             <label>Email address<input autoComplete="username" type="email" value={registering && email === 'admin@brandguard.demo' ? '' : email} onChange={(event) => setEmail(event.target.value)} placeholder={registering ? 'you@company.com' : undefined} required /></label>
             <label>Password<div className="password-field"><input autoComplete={registering ? 'new-password' : 'current-password'} type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={registering ? 8 : undefined} required /><button type="button" onClick={() => setShowPassword((show) => !show)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>{registering && <small className="registration-hint">Use at least 8 characters.</small>}</label>
@@ -62,7 +65,7 @@ export default function Login() {
             <button className="button button-primary login-submit" disabled={busy || (registering && workspaceExists === null)}>{busy ? (registering ? 'Creating workspace…' : 'Signing in…') : (registering ? 'Create account' : 'Continue to workspace')} <ArrowRight size={17} /></button>
           </form>
           {registering ? <div className="auth-switch">Already have an account? <button onClick={() => { setRegistering(false); setError(''); setEmail(''); setPassword(''); }}>Sign in</button></div> : <div className="auth-switch">Don’t have an account? <button onClick={() => { setRegistering(true); setError(''); setName(''); setWorkspaceName(''); setWorkspaceExists(null); setRole('admin'); setConfirmPassword(''); setEmail(''); setPassword(''); }}>Register</button></div>}
-          {!registering && <div className="demo-access"><div className="demo-access-heading"><span>DEMO ACCESS</span><span className="demo-live"><i /> LIVE DATA</span></div><p>Use one of the preconfigured roles to explore the review workflow.</p>
+          {!registering && <div className="demo-access"><div className="demo-access-heading"><span>DEMO ACCESS</span><span className="demo-live"><i /> LIVE DATA</span></div><p>No approval needed. These accounts share one public workspace: everyone using them can see your changes. Use sample content only.</p>
             <div className="demo-roles"><button onClick={() => { setEmail('admin@brandguard.demo'); setPassword('BrandGuard@123'); }}>Admin</button><button onClick={() => { setEmail('creator@brandguard.demo'); setPassword('BrandGuard@123'); }}>Creator</button><button onClick={() => { setEmail('manager@brandguard.demo'); setPassword('BrandGuard@123'); }}>Manager</button><button onClick={() => { setEmail('reviewer@brandguard.demo'); setPassword('BrandGuard@123'); }}>Reviewer</button></div>
             <div className="demo-password">Shared password <code>BrandGuard@123</code></div>
           </div>}

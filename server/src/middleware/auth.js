@@ -26,6 +26,7 @@ export async function requireAuth(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(payload.sub).select('-passwordHash');
     if (!user || !user.isActive) throw new ApiError(401, 'Your session is no longer valid.');
+    if (user.membershipStatus !== 'approved') throw new ApiError(403, 'Workspace access requires administrator approval.');
     req.user = user;
     next();
   } catch (error) {
