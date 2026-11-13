@@ -37,10 +37,9 @@ export default function AppLayout() {
           <div><div className="brand-name">brandguard<span>®</span></div><div className="brand-subtitle">BRAND GOVERNANCE</div></div></button>
           <button className="icon-button sidebar-close" onClick={() => setMobileNavOpen(false)} aria-label="Close menu">×</button>
         </div>
-        <button className="workspace-switcher" onClick={() => navigate('/')} aria-label={`${user?.workspaceName || 'Workspace'} overview`}>
+        <button className="workspace-switcher" onClick={() => { navigate('/'); setMobileNavOpen(false); }} aria-label={`${user?.workspaceName || 'Workspace'} overview`} title="Open workspace overview">
           <div className="workspace-avatar">{initials(user?.workspaceName)}</div>
           <div className="workspace-copy"><strong>{user?.workspaceName || 'Your workspace'}</strong><span>Shared workspace</span></div>
-          <ChevronDown size={15} className="muted-icon" />
         </button>
         <div className="nav-label">WORKSPACE</div>
         <nav className="main-nav">
