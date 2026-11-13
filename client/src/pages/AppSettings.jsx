@@ -2,27 +2,23 @@ import { useEffect, useState } from 'react';
 import { Check, RotateCcw, SlidersHorizontal, Sun, Moon, Trash2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import { preferenceDefaults as defaults, readPreferences, savePreferences } from '../preferences';
 
-const defaults = { compactLists: false, preferredChannel: 'linkedin', theme: 'light' };
-const storageKey = 'brandguard.appPreferences';
-
-function readPreferences() {
-  try { return { ...defaults, ...JSON.parse(localStorage.getItem(storageKey) || '{}') }; }
-  catch { return defaults; }
-}
 
 export default function AppSettings() {
   const [preferences, setPreferences] = useState(readPreferences);
   const [saved, setSaved] = useState(false);
+  const [preferenceError, setPreferenceError] = useState('');
   const { user, logout } = useAuth();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [deleting, setDeleting] = useState(false);
-  useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(preferences)); document.documentElement.dataset.theme = preferences.theme; window.dispatchEvent(new Event('brandguard-preferences-changed')); setSaved(true); const timer = setTimeout(() => setSaved(false), 1600); return () => clearTimeout(timer); }, [preferences]);
+  useEffect(() => { try { savePreferences(preferences); setPreferenceError(''); setSaved(true); } catch { setPreferenceError('Your browser could not save these preferences. Allow site storage and try again.'); } const timer = setTimeout(() => setSaved(false), 1600); return () => clearTimeout(timer); }, [preferences]);
   const toggle = (key) => setPreferences((current) => ({ ...current, [key]: !current[key] }));
   return <div className="page-stack">
     <section className="page-title-row"><div><div className="eyebrow"><span className="eyebrow-line" /> PERSONAL PREFERENCES</div><h1>App settings</h1><p>Choose how BrandGuard works for you. These preferences stay in this browser.</p></div>{saved && <span className="preferences-saved"><Check size={14} /> Saved automatically</span>}</section>
+    {preferenceError && <div className="inline-alert error-alert" role="alert">{preferenceError}</div>}
     <section className="panel preferences-panel"><div className="panel-heading"><div><span className="panel-kicker">YOUR REVIEW WORKFLOW</span><h2>Make the app fit your work</h2></div><SlidersHorizontal size={18} /></div>
       <label className="preference-row"><span><strong>Compact review lists</strong><small>Show more reviews in the queue at once.</small></span><input type="checkbox" checked={preferences.compactLists} onChange={() => toggle('compactLists')} /></label>
       <label className="preference-row preference-select"><span><strong>Preferred publishing channel</strong><small>Preselect this channel when you start a review.</small></span><select value={preferences.preferredChannel} onChange={(event) => setPreferences((current) => ({ ...current, preferredChannel: event.target.value }))}><option value="linkedin">LinkedIn</option><option value="website">Website</option><option value="email">Email</option><option value="print">Print / Brochure</option><option value="other">Other</option></select></label>

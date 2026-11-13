@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ClipboardCheck, FileText, Lightbulb, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { readPreferences } from '../preferences';
 
 const example = 'Meet the easier way to bring your team’s work together. AcmeFlow helps you organise projects, keep conversations in context and move your next idea forward. Start your 14-day free trial today.';
 
 export default function NewReview() {
-  const [form, setForm] = useState(() => { let preferredChannel = 'linkedin'; try { preferredChannel = JSON.parse(localStorage.getItem('brandguard.appPreferences') || '{}').preferredChannel || 'linkedin'; } catch {} return { title: '', channel: preferredChannel, audience: '', objective: '', body: '' }; });
+  const [form, setForm] = useState(() => ({ title: '', channel: readPreferences().preferredChannel, audience: '', objective: '', body: '' }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();

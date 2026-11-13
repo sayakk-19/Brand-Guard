@@ -18,9 +18,21 @@ export function AuthProvider({ children }) {
     return () => { active = false; };
   }, []);
 
+  // Recheck permissions when returning from another tab where an admin changed a role.
+  useEffect(() => {
+    if (!user) return undefined;
+    let active = true;
+    const refresh = () => api.get('/auth/me')
+      .then(({ data }) => { if (active) setUser(data.user); })
+      .catch((error) => { if (active && error.response?.status === 401) setUser(null); });
+    window.addEventListener('focus', refresh);
+    return () => { active = false; window.removeEventListener('focus', refresh); };
+  }, [user?.id]);
+
   const value = useMemo(() => ({
     user,
     loading,
+    sessionNotice,
     async login(credentials) {
       const { data } = await api.post('/auth/login', credentials);
       setUser(data.user);

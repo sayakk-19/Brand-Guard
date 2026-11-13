@@ -38,7 +38,7 @@ export default function AppLayout() {
           <button className="icon-button sidebar-close" onClick={() => setMobileNavOpen(false)} aria-label="Close menu">×</button>
         </div>
         <button className="workspace-switcher" onClick={() => navigate('/')} aria-label={`${user?.workspaceName || 'Workspace'} overview`}>
-          <div className="workspace-avatar">A</div>
+          <div className="workspace-avatar">{initials(user?.workspaceName)}</div>
           <div className="workspace-copy"><strong>{user?.workspaceName || 'Your workspace'}</strong><span>Shared workspace</span></div>
           <ChevronDown size={15} className="muted-icon" />
         </button>

@@ -33,7 +33,7 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHea
 app.get('/api/health', (req, res) => res.json({ success: true, service: 'BrandGuard API', status: 'healthy', timestamp: new Date().toISOString() }));
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/workspace-lookup', authLimiter);
+app.use('/api/auth/workspace-lookup', rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false, message: { success: false, message: 'Too many workspace checks. Please wait a minute and try again.' } }));
 app.use('/api/auth', authRoutes);
 app.use('/api/brand', requireAuth, brandRoutes);
 app.use('/api/reviews', requireAuth, reviewRoutes);

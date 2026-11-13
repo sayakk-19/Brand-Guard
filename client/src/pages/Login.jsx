@@ -10,6 +10,7 @@ export default function Login() {
   const [name, setName] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
   const [workspaceExists, setWorkspaceExists] = useState(null);
+  const [lookupError, setLookupError] = useState('');
   const [role, setRole] = useState('admin');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [registering, setRegistering] = useState(false);
@@ -20,7 +21,8 @@ export default function Login() {
   useEffect(() => {
     if (!registering || workspaceName.trim().length < 2) { setWorkspaceExists(null); return undefined; }
     let active = true;
-    const timer = setTimeout(() => api.get('/auth/workspace-lookup', { params: { name: workspaceName.trim() } }).then(({ data }) => { if (active) { setWorkspaceExists(data.exists); setRole(data.exists ? 'creator' : 'admin'); } }).catch(() => { if (active) setWorkspaceExists(null); }), 350);
+    setLookupError('');
+    const timer = setTimeout(() => api.get('/auth/workspace-lookup', { params: { name: workspaceName.trim() } }).then(({ data }) => { if (active) { setWorkspaceExists(data.exists); setRole(data.exists ? 'creator' : 'admin'); } }).catch((err) => { if (active) { setWorkspaceExists(null); setLookupError(err.userMessage || 'Could not check this workspace. Try entering its name again.'); } }), 350);
     return () => { active = false; clearTimeout(timer); };
   }, [registering, workspaceName]);
 
@@ -56,7 +58,8 @@ export default function Login() {
             <label>Password<div className="password-field"><input autoComplete={registering ? 'new-password' : 'current-password'} type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} minLength={registering ? 8 : undefined} required /><button type="button" onClick={() => setShowPassword((show) => !show)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>{registering && <small className="registration-hint">Use at least 8 characters.</small>}</label>
             {registering && <label>Confirm password<div className="password-field"><input autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required /></div></label>}
             {error && <div className="form-error">{error}</div>}
-            <button className="button button-primary login-submit" disabled={busy}>{busy ? (registering ? 'Creating workspace…' : 'Signing in…') : (registering ? 'Create account' : 'Continue to workspace')} <ArrowRight size={17} /></button>
+            {registering && lookupError && <div className="form-error" role="alert">{lookupError}</div>}
+            <button className="button button-primary login-submit" disabled={busy || (registering && workspaceExists === null)}>{busy ? (registering ? 'Creating workspace…' : 'Signing in…') : (registering ? 'Create account' : 'Continue to workspace')} <ArrowRight size={17} /></button>
           </form>
           {registering ? <div className="auth-switch">Already have an account? <button onClick={() => { setRegistering(false); setError(''); setEmail(''); setPassword(''); }}>Sign in</button></div> : <div className="auth-switch">Don’t have an account? <button onClick={() => { setRegistering(true); setError(''); setName(''); setWorkspaceName(''); setWorkspaceExists(null); setRole('admin'); setConfirmPassword(''); setEmail(''); setPassword(''); }}>Register</button></div>}
           {!registering && <div className="demo-access"><div className="demo-access-heading"><span>DEMO ACCESS</span><span className="demo-live"><i /> LIVE DATA</span></div><p>Use one of the preconfigured roles to explore the review workflow.</p>
