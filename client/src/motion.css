@@ -1,0 +1,41 @@
+/* Motion uses opacity and transforms, with no scroll listeners or layout work per frame. */
+:root { --ease-out: cubic-bezier(.22, 1, .36, 1); }
+.button, .icon-button, .theme-toggle, .theme-option, .demo-roles button, .floating-create {
+  transition: transform .2s var(--ease-out), background-color .2s, color .2s, border-color .2s, box-shadow .2s;
+}
+.button:active:not(:disabled), .theme-toggle:active, .floating-create:active { transform: scale(.97); }
+.button svg, .nav-link svg, .row-arrow, .theme-toggle svg { transition: transform .25s var(--ease-out); }
+.theme-toggle svg { animation: icon-enter .3s var(--ease-out); }
+.nav-link { transition: background-color .2s, color .2s, box-shadow .2s; }
+.metric-card, .rule-card, .insight-stat { transition: transform .25s var(--ease-out), box-shadow .25s, border-color .25s; }
+.progress-track span, .bar-track span { transition: width .6s var(--ease-out); }
+.route-content { animation: page-enter .3s ease-out; }
+.metrics-grid > *, .rules-grid > *, .insight-stats-grid > * { animation: card-enter .45s var(--ease-out) backwards; }
+:is(.metrics-grid, .rules-grid, .insight-stats-grid) > :nth-child(2) { animation-delay: .045s; }
+:is(.metrics-grid, .rules-grid, .insight-stats-grid) > :nth-child(3) { animation-delay: .09s; }
+:is(.metrics-grid, .rules-grid, .insight-stats-grid) > :nth-child(n+4) { animation-delay: .135s; }
+.modal-backdrop { animation: page-enter .18s ease-out; }
+.modal-card { animation: dialog-enter .28s var(--ease-out); }
+.profile-menu { animation: menu-enter .2s var(--ease-out); transform-origin: bottom right; }
+.finding-card-body { animation: page-enter .25s ease-out; }
+.login-form-wrap { animation: card-enter .5s var(--ease-out); }
+.theme-option-selected { transition: background-color .2s, box-shadow .2s; }
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled), .floating-create:hover { transform: translateY(-2px); box-shadow: 0 5px 14px #0a26321a; }
+  .button:hover:not(:disabled) svg:last-child, .clickable-row:hover .row-arrow { transform: translateX(2px); }
+  .theme-toggle:hover svg { transform: rotate(-12deg); }
+  .nav-link:hover svg { transform: translateX(2px); }
+  .metric-card:hover, .rule-card:hover, .insight-stat:hover { transform: translateY(-3px); border-color: var(--line-dark); box-shadow: 0 12px 24px #06132912; }
+}
+
+@keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes card-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes dialog-enter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes menu-enter { from { opacity: 0; transform: translateY(5px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes icon-enter { from { opacity: .3; transform: rotate(-35deg) scale(.8); } to { opacity: 1; transform: rotate(0) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .button:hover, .metric-card:hover, .rule-card:hover, .insight-stat:hover, .floating-create:hover { transform: none; }
+}

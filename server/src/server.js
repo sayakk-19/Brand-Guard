@@ -13,6 +13,7 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import workspaceRoutes from './routes/workspace.routes.js';
 import { requireAuth } from './middleware/auth.js';
 import { errorHandler, notFound } from './middleware/error.js';
+import { startScheduledPing } from './services/scheduledPing.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -43,4 +44,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 await connectDatabase();
-app.listen(port, () => console.log(`BrandGuard API listening on http://localhost:${port}`));
+const server = app.listen(port, () => console.log(`BrandGuard API listening on http://localhost:${port}`));
+const stopScheduledPing = startScheduledPing();
+server.on('close', stopScheduledPing);

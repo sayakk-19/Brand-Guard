@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { Check, RotateCcw, SlidersHorizontal, Sun, Moon, Trash2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
-import { preferenceDefaults as defaults, readPreferences, savePreferences } from '../preferences';
+import { preferenceDefaults as defaults } from '../preferences';
+import { usePreferences } from '../hooks/usePreferences';
 
 
 export default function AppSettings() {
-  const [preferences, setPreferences] = useState(readPreferences);
+  const { preferences, setPreferences, error: preferenceError } = usePreferences();
   const [saved, setSaved] = useState(false);
-  const [preferenceError, setPreferenceError] = useState('');
   const { user, logout } = useAuth();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [deleting, setDeleting] = useState(false);
-  useEffect(() => { try { savePreferences(preferences); setPreferenceError(''); setSaved(true); } catch { setPreferenceError('Your browser could not save these preferences. Allow site storage and try again.'); } const timer = setTimeout(() => setSaved(false), 1600); return () => clearTimeout(timer); }, [preferences]);
+  useEffect(() => { setSaved(true); const timer = setTimeout(() => setSaved(false), 1600); return () => clearTimeout(timer); }, [preferences]);
   const toggle = (key) => setPreferences((current) => ({ ...current, [key]: !current[key] }));
   return <div className="page-stack">
     <section className="page-title-row"><div><div className="eyebrow"><span className="eyebrow-line" /> PERSONAL PREFERENCES</div><h1>App settings</h1><p>Choose how BrandGuard works for you. These preferences stay in this browser.</p></div>{saved && <span className="preferences-saved"><Check size={14} /> Saved automatically</span>}</section>

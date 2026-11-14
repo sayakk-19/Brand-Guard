@@ -3,6 +3,7 @@ import { Activity, BookOpenCheck, ChevronDown, FileCheck2, LayoutDashboard, LogO
 import { useAuth } from '../context/AuthContext';
 import { initials } from '../utils';
 import { useEffect, useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 const navigation = [
   { label: 'Overview', to: '/', icon: LayoutDashboard, end: true },
@@ -73,13 +74,14 @@ export default function AppLayout() {
         <header className="topbar">
           <div className="topbar-left"><button className="mobile-menu icon-button" onClick={() => setMobileNavOpen(true)} aria-label="Open menu">☰</button><button className="breadcrumb-muted breadcrumb-home" onClick={() => navigate('/')} aria-label="Go to workspace overview">Workspace</button><span className="breadcrumb-divider">/</span><span className="breadcrumb-current">{pageTitle}</span></div>
           <div className="topbar-right">
+            <ThemeToggle />
             {searchOpen ? <form className="search-shortcut search-shortcut-open" onSubmit={(event) => { event.preventDefault(); navigate(`/reviews${searchTerm.trim() ? `?q=${encodeURIComponent(searchTerm.trim())}` : ''}`); setSearchOpen(false); }}><Search size={15} /><input autoFocus value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') { setSearchOpen(false); setSearchTerm(''); } }} placeholder="Search reviews…" aria-label="Search reviews" /><button type="submit">Go</button></form> : <button className="search-shortcut" onClick={() => setSearchOpen(true)} title="Search content reviews"><Search size={15} /><span>Search reviews</span><kbd>↵</kbd></button>}
             <div className="topbar-divider" />
             <div className="topbar-workspace"><span className="status-pulse" /> All systems operational</div>
             <button className="avatar avatar-top avatar-top-button" onClick={() => navigate('/profile')} aria-label="See your profile">{initials(user?.name)}</button>
           </div>
         </header>
-        <div className="page-container"><Outlet /></div>
+        <div className="page-container"><div className="route-content" key={location.pathname}><Outlet /></div></div>
       </main>
       <button className="floating-create" onClick={() => navigate('/reviews/new')} aria-label="Create a review"><Plus size={21} /></button>
     </div>

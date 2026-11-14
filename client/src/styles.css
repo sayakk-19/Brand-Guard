@@ -744,36 +744,5 @@ a { color: inherit; text-decoration: none; }
 .team-member-row select:disabled { opacity: .65; }
 .team-management-note, .team-empty { margin: 12px 0 0; color: #98a49d; font-size: 9px; line-height: 1.6; }
 .success-alert { margin: 8px 0; padding: 9px 10px; color: #397552; border: 1px solid #d9ecdf; border-radius: 5px; background: #f1faf3; font-size: 10px; }
-html[data-theme="dark"] .session-toast { color: #c6e4ce; background: #24392b; border-color: #3b6046; }
-html[data-theme="dark"] .team-member-info strong { color: #d4e0d8; }
-html[data-theme="dark"] .team-member-row { border-color: #2c3932; }
-html[data-theme="dark"] .team-member-row select { color: #d2dfd7; background: #202c26; border-color: #34443b; }
-html[data-theme="dark"] .success-alert { color: #bde0c6; background: #263b2d; border-color: #3b5944; }
 
-/* Dark appearance for the workspace surfaces and common controls. */
-html[data-theme="dark"] { color-scheme: dark; }
-html[data-theme="dark"] body { color: #dce7e1; background: #151c19; }
-html[data-theme="dark"] .sidebar, html[data-theme="dark"] .topbar, html[data-theme="dark"] .panel, html[data-theme="dark"] .rule-card, html[data-theme="dark"] .modal-card { color: #dce7e1; background: #1d2722; border-color: #2c3932; }
-html[data-theme="dark"] .main-area { background: #151c19; }
-html[data-theme="dark"] .topbar { background: rgba(29,39,34,.94); }
-html[data-theme="dark"] .page-stack h1, html[data-theme="dark"] .page-stack h2, html[data-theme="dark"] .page-stack h3, html[data-theme="dark"] .brand-name, html[data-theme="dark"] .workspace-copy strong, html[data-theme="dark"] .profile-copy strong { color: #e0e9e4; }
-html[data-theme="dark"] .page-stack p, html[data-theme="dark"] .page-title-row > div > p, html[data-theme="dark"] .breadcrumb-muted, html[data-theme="dark"] .breadcrumb-current, html[data-theme="dark"] .panel-kicker, html[data-theme="dark"] .eyebrow { color: #9eb0a5; }
-html[data-theme="dark"] .workspace-switcher, html[data-theme="dark"] .search-shortcut, html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea, html[data-theme="dark"] .theme-options { color: #d8e3dc; background: #202c26; border-color: #34443b; }
-html[data-theme="dark"] .workspace-switcher:hover, html[data-theme="dark"] .nav-link:hover, html[data-theme="dark"] .profile-menu button:hover { background: #28372f; }
-html[data-theme="dark"] .nav-link { color: #a5b4ab; }
-html[data-theme="dark"] .nav-link-active { color: #bfe0ca; background: #294437; }
-html[data-theme="dark"] .sidebar-footer, html[data-theme="dark"] .profile-row, html[data-theme="dark"] .account-details dl > div, html[data-theme="dark"] .preference-row, html[data-theme="dark"] .theme-setting { border-color: #2c3932; }
-html[data-theme="dark"] .profile-menu { background: #202c26; border-color: #34443b; }
-html[data-theme="dark"] .profile-menu-email, html[data-theme="dark"] .profile-menu button, html[data-theme="dark"] .account-details dt, html[data-theme="dark"] .preference-row small, html[data-theme="dark"] .theme-setting small { color: #a4b3aa; }
-html[data-theme="dark"] .account-details dd, html[data-theme="dark"] .preference-row strong, html[data-theme="dark"] .theme-setting strong { color: #d4e0d8; }
-html[data-theme="dark"] .brand-summary-strip, html[data-theme="dark"] .sidebar-card, html[data-theme="dark"] .guidance-panel, html[data-theme="dark"] .decision-panel { color: #dce7e1; background: #22342a; border-color: #34483b; }
-html[data-theme="dark"] .theme-option-selected { color: #d8ecde; background: #30463a; border-color: #476451; }
-html[data-theme="dark"] .account-role-badge, html[data-theme="dark"] .preferences-saved { color: #b6d9c1; background: #263c2f; border-color: #3a5945; }
-html[data-theme="dark"] .button-secondary, html[data-theme="dark"] .button-ghost { color: #c2d2c8; background: #243129; border-color: #3b4b41; }
-html[data-theme="dark"] .data-table tbody td, html[data-theme="dark"] .data-table thead th { color: #b8c7be; border-color: #2c3932; }
-html[data-theme="dark"] .danger-zone { background: #2b2423; border-color: #5c3c38; }
-html[data-theme="dark"] .danger-zone-copy h2 { color: #e1b4ae; }
-html[data-theme="dark"] .danger-zone-copy p { color: #bd958f; }
-html[data-theme="dark"] .login-shell, html[data-theme="dark"] .login-right { background: #151c19; }
-html[data-theme="dark"] .login-form-heading h2, html[data-theme="dark"] .login-form > label { color: #d8e3dc; }
 @media (max-width: 760px) { .account-profile-grid { grid-template-columns: 1fr; } .danger-zone { align-items: flex-start; flex-wrap: wrap; } .danger-zone-copy { min-width: calc(100% - 54px); } .danger-zone .button { margin-left: 48px; } }

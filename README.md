@@ -272,3 +272,22 @@ node server/tests/workflow.integration.js
 The last command launches a temporary local MongoDB on port 27028 and never reads `server/.env`. Set `MONGOD_BINARY` to your `mongod` executable if it is not at the Windows default in that script. Keep port 27028 free. Temporary test files are left in the OS temporary directory for inspection. Tests must not be pointed at production.
 
 See [Round 3 submission](docs/ROUND3_SUBMISSION.md) for feature inventory, architecture, evidence, known limitations and the release checklist.
+
+## Project walkthrough and appearance
+
+Read [the file-by-file project guide](docs/PROJECT_WALKTHROUGH.md) for architecture, workflow/data flow, implementation limits and interview explanations.
+
+The client now includes Lenis scrolling, short interaction animations, a midnight blue/teal theme and blue navigation. The top-bar theme switch and App settings share browser preferences. Reduced-motion users retain native scrolling and disabled decorative animations. Scrollable dialogs, editors and tables keep native scrolling. See `client/src/themes.css` and `client/src/motion.css` for appearance and motion.
+
+## Scheduled backend health ping
+
+In production, `server/src/services/scheduledPing.js` sends a request every 20 minutes to the backend's `/api/health`, skipping **01:00–05:00 Asia/Kolkata (IST)**. It does not ping immediately at startup. Manual requests and manual startup remain available during quiet hours. The next eligible interval resumes pings if the process is still running.
+
+```env
+SELF_PING_ENABLED=true
+SELF_PING_URL=https://brandguard-bk3c.onrender.com
+```
+
+Set `SELF_PING_ENABLED=false` to disable. Development and test startup do not run the timer. If no URL override exists, the code uses `RENDER_EXTERNAL_URL`, then the BrandGuard URL above. Requests time out after 10 seconds and cannot overlap. Update Render environment variables when overriding these defaults; editing `.env.example` does not change an existing deployment.
+
+**This is not a reliable keep-awake mechanism.** Render sleeps free services after 15 idle minutes, before a 20-minute timer can reliably help; a sleeping process cannot execute a timer or wake itself. The workspace's 750 free monthly hours are shared across its free services. A 20-hour daily uptime target alone represents about 600 hours in a 30-day month. Quiet hours suppress automatic pings, not user traffic or billing. No external scheduler or shared-quota enforcement is configured. See [Render's free-service documentation](https://render.com/docs/free).
